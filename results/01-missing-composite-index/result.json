@@ -1,0 +1,448 @@
+{
+  "case": "01",
+  "slug": "01-missing-composite-index",
+  "title": "Missing composite index",
+  "category": "Indexing",
+  "driver": "plan",
+  "summary": "An \"open orders\" panel filters on customer and status and sorts by date, but only a single-column customer_id index exists.",
+  "params": {
+    "customer_id": "1"
+  },
+  "measured_at": "2026-10-18T05:13:58+00:00",
+  "environment": {
+    "server_version": "16.15 (Debian 16.15-1.pgdg12+2)",
+    "scale": "1.0",
+    "as_of": "2026-09-30T23:59:59+00:00",
+    "rows": {
+      "customers": 2000000,
+      "products": 100000,
+      "orders": 15000000,
+      "order_items": 37313408,
+      "page_views": 10000000
+    },
+    "database_size": "6928 MB",
+    "cpus": 8,
+    "memory_gb": 3.8,
+    "settings": {
+      "default_statistics_target": "100",
+      "effective_cache_size": "2560MB",
+      "jit": "off",
+      "max_parallel_workers_per_gather": "2",
+      "random_page_cost": "1.1",
+      "shared_buffers": "1GB",
+      "work_mem": "16MB"
+    }
+  },
+  "hypo": {
+    "estimated_cost_before": 16513.64,
+    "estimated_cost_with_hypothetical": 562.94,
+    "planner_uses_hypothetical_index": true,
+    "hypothetical_indexes": [
+      {
+        "name": "<13561>btree_orders_customer_id_status_created_at",
+        "estimated_size": "768 MB",
+        "estimated_bytes": 805642240
+      }
+    ]
+  },
+  "before": {
+    "timing": {
+      "runs_ms": [
+        7.224,
+        8.019,
+        5.355,
+        5.875,
+        7.239,
+        8.748,
+        8.149,
+        10.564,
+        8.0
+      ],
+      "median_ms": 8.0,
+      "min_ms": 5.355,
+      "max_ms": 10.564,
+      "rows": 20,
+      "result_digest": "c07391338b0cd69d",
+      "server": {
+        "calls": 1.0,
+        "exec_ms": 6.756,
+        "rows": 20.0,
+        "shared_hit": 836.889,
+        "shared_read": 0.0,
+        "shared_dirtied": 0.0,
+        "temp_blks": 0.0,
+        "io_ms": 0.0,
+        "wal_bytes": 0.0,
+        "non_io_ms": 6.756
+      }
+    },
+    "plan": {
+      "rows_removed": 47565,
+      "execution_ms": 5.672,
+      "planning_ms": 0.155,
+      "rows": 20,
+      "total_cost": 16513.64,
+      "shared_hit_blocks": 849,
+      "shared_read_blocks": 0,
+      "buffers_touched_mb": 6.63,
+      "temp_read_blocks": 0,
+      "temp_written_blocks": 0,
+      "io_read_ms": 0.0,
+      "root_q_error": 1.0,
+      "worst_estimate": {
+        "label": "Limit",
+        "estimated_rows": 20,
+        "actual_rows": 20,
+        "loops": 1,
+        "q_error": 1.0
+      },
+      "node_types": [
+        "Gather Merge",
+        "Index Scan",
+        "Limit"
+      ],
+      "nodes": [
+        {
+          "depth": 0,
+          "label": "Limit",
+          "estimated_rows": 20,
+          "actual_rows": 20,
+          "loops": 1,
+          "q_error": 1.0
+        },
+        {
+          "depth": 1,
+          "label": "Gather Merge",
+          "estimated_rows": 485,
+          "actual_rows": 20,
+          "loops": 1,
+          "q_error": 24.25
+        },
+        {
+          "depth": 2,
+          "label": "Index Scan Backward using orders_created_at_idx on orders",
+          "estimated_rows": 202,
+          "actual_rows": 14,
+          "loops": 3,
+          "q_error": 14.43
+        }
+      ],
+      "workers_launched": 2
+    }
+  },
+  "alternatives": [
+    {
+      "key": "customer-created",
+      "name": "Index (customer_id, created_at DESC) without status",
+      "note": "Serves every status filter with one index, but for an 'open orders' query on a big account it walks delivered orders until it finds 20 in flight.",
+      "fix_sql": "CREATE INDEX orders_customer_created_idx ON orders (customer_id, created_at DESC);\n",
+      "fix_seconds": 21.57,
+      "storage": {
+        "index_bytes": 473079808,
+        "table_bytes": 0,
+        "changes": [
+          {
+            "relation": "orders_customer_created_idx",
+            "kind": "index",
+            "before_bytes": 0,
+            "after_bytes": 473079808,
+            "delta_bytes": 473079808,
+            "status": "added"
+          }
+        ]
+      },
+      "timing": {
+        "runs_ms": [
+          0.427,
+          0.368,
+          0.4,
+          0.419,
+          0.371,
+          0.397,
+          0.381,
+          0.382,
+          0.408
+        ],
+        "median_ms": 0.397,
+        "min_ms": 0.368,
+        "max_ms": 0.427,
+        "rows": 20,
+        "result_digest": "c07391338b0cd69d",
+        "server": {
+          "calls": 1.0,
+          "exec_ms": 0.023,
+          "rows": 20.0,
+          "shared_hit": 29.0,
+          "shared_read": 0.0,
+          "shared_dirtied": 0.0,
+          "temp_blks": 0.0,
+          "io_ms": 0.0,
+          "wal_bytes": 0.0,
+          "non_io_ms": 0.023
+        }
+      },
+      "plan": {
+        "rows_removed": 6,
+        "execution_ms": 0.075,
+        "planning_ms": 0.073,
+        "rows": 20,
+        "total_cost": 1015.87,
+        "shared_hit_blocks": 29,
+        "shared_read_blocks": 0,
+        "buffers_touched_mb": 0.23,
+        "temp_read_blocks": 0,
+        "temp_written_blocks": 0,
+        "io_read_ms": 0.0,
+        "root_q_error": 1.0,
+        "worst_estimate": {
+          "label": "Limit",
+          "estimated_rows": 20,
+          "actual_rows": 20,
+          "loops": 1,
+          "q_error": 1.0
+        },
+        "node_types": [
+          "Index Scan",
+          "Limit"
+        ],
+        "nodes": [
+          {
+            "depth": 0,
+            "label": "Limit",
+            "estimated_rows": 20,
+            "actual_rows": 20,
+            "loops": 1,
+            "q_error": 1.0
+          },
+          {
+            "depth": 1,
+            "label": "Index Scan using orders_customer_created_idx on orders",
+            "estimated_rows": 485,
+            "actual_rows": 20,
+            "loops": 1,
+            "q_error": 24.25
+          }
+        ],
+        "workers_launched": 0
+      }
+    },
+    {
+      "key": "partial",
+      "name": "Partial index on in-flight orders only",
+      "note": "Tiny and just as fast for this panel, because in-flight orders are a fraction of a percent of the table. It serves only queries that repeat the same status predicate, and leaves the account page's other tabs on the single-column index.",
+      "fix_sql": "CREATE INDEX orders_open_by_customer_idx ON orders (customer_id, created_at DESC)\n  WHERE status IN ('pending', 'paid', 'shipped');\n",
+      "fix_seconds": 3.25,
+      "storage": {
+        "index_bytes": 9625600,
+        "table_bytes": 0,
+        "changes": [
+          {
+            "relation": "orders_open_by_customer_idx",
+            "kind": "index",
+            "before_bytes": 0,
+            "after_bytes": 9625600,
+            "delta_bytes": 9625600,
+            "status": "added"
+          }
+        ]
+      },
+      "timing": {
+        "runs_ms": [
+          0.8,
+          1.599,
+          1.253,
+          1.783,
+          1.613,
+          1.68,
+          1.897,
+          1.872,
+          0.682
+        ],
+        "median_ms": 1.613,
+        "min_ms": 0.682,
+        "max_ms": 1.897,
+        "rows": 20,
+        "result_digest": "c07391338b0cd69d",
+        "server": {
+          "calls": 1.0,
+          "exec_ms": 0.11,
+          "rows": 20.0,
+          "shared_hit": 22.0,
+          "shared_read": 0.0,
+          "shared_dirtied": 0.0,
+          "temp_blks": 0.0,
+          "io_ms": 0.0,
+          "wal_bytes": 0.0,
+          "non_io_ms": 0.11
+        }
+      },
+      "plan": {
+        "rows_removed": 0,
+        "execution_ms": 0.132,
+        "planning_ms": 0.277,
+        "rows": 20,
+        "total_cost": 22.86,
+        "shared_hit_blocks": 22,
+        "shared_read_blocks": 0,
+        "buffers_touched_mb": 0.17,
+        "temp_read_blocks": 0,
+        "temp_written_blocks": 0,
+        "io_read_ms": 0.0,
+        "root_q_error": 1.0,
+        "worst_estimate": {
+          "label": "Limit",
+          "estimated_rows": 20,
+          "actual_rows": 20,
+          "loops": 1,
+          "q_error": 1.0
+        },
+        "node_types": [
+          "Index Scan",
+          "Limit"
+        ],
+        "nodes": [
+          {
+            "depth": 0,
+            "label": "Limit",
+            "estimated_rows": 20,
+            "actual_rows": 20,
+            "loops": 1,
+            "q_error": 1.0
+          },
+          {
+            "depth": 1,
+            "label": "Index Scan using orders_open_by_customer_idx on orders",
+            "estimated_rows": 485,
+            "actual_rows": 20,
+            "loops": 1,
+            "q_error": 24.25
+          }
+        ],
+        "workers_launched": 0
+      }
+    }
+  ],
+  "fix": {
+    "seconds": 30.88,
+    "storage": {
+      "index_bytes": 591364096,
+      "table_bytes": 0,
+      "changes": [
+        {
+          "relation": "orders_customer_id_idx",
+          "kind": "index",
+          "before_bytes": 151191552,
+          "after_bytes": 0,
+          "delta_bytes": -151191552,
+          "status": "dropped"
+        },
+        {
+          "relation": "orders_customer_status_created_idx",
+          "kind": "index",
+          "before_bytes": 0,
+          "after_bytes": 742555648,
+          "delta_bytes": 742555648,
+          "status": "added"
+        }
+      ]
+    },
+    "sql": "-- Equality columns first, then the sort column, so the index hands back rows\n-- already in the order the page wants and the scan stops after 20.\nCREATE INDEX orders_customer_status_created_idx\n  ON orders (customer_id, status, created_at DESC);\n\n-- (customer_id) is now a prefix of the new index. Any query that used it can\n-- use the composite instead, so keeping it only costs write amplification and\n-- disk.\nDROP INDEX orders_customer_id_idx;\n"
+  },
+  "after": {
+    "timing": {
+      "runs_ms": [
+        0.517,
+        0.473,
+        0.441,
+        0.443,
+        0.41,
+        0.439,
+        0.425,
+        0.394,
+        0.418
+      ],
+      "median_ms": 0.439,
+      "min_ms": 0.394,
+      "max_ms": 0.517,
+      "rows": 20,
+      "result_digest": "c07391338b0cd69d",
+      "server": {
+        "calls": 1.0,
+        "exec_ms": 0.141,
+        "rows": 20.0,
+        "shared_hit": 410.0,
+        "shared_read": 0.0,
+        "shared_dirtied": 0.0,
+        "temp_blks": 0.0,
+        "io_ms": 0.0,
+        "wal_bytes": 0.0,
+        "non_io_ms": 0.141
+      }
+    },
+    "plan": {
+      "rows_removed": 0,
+      "execution_ms": 0.166,
+      "planning_ms": 0.021,
+      "rows": 20,
+      "total_cost": 561.14,
+      "shared_hit_blocks": 410,
+      "shared_read_blocks": 0,
+      "buffers_touched_mb": 3.2,
+      "temp_read_blocks": 0,
+      "temp_written_blocks": 0,
+      "io_read_ms": 0.0,
+      "root_q_error": 1.0,
+      "worst_estimate": {
+        "label": "Limit",
+        "estimated_rows": 20,
+        "actual_rows": 20,
+        "loops": 1,
+        "q_error": 1.0
+      },
+      "node_types": [
+        "Index Scan",
+        "Limit",
+        "Sort"
+      ],
+      "nodes": [
+        {
+          "depth": 0,
+          "label": "Limit",
+          "estimated_rows": 20,
+          "actual_rows": 20,
+          "loops": 1,
+          "q_error": 1.0
+        },
+        {
+          "depth": 1,
+          "label": "Sort",
+          "estimated_rows": 485,
+          "actual_rows": 20,
+          "loops": 1,
+          "q_error": 24.25
+        },
+        {
+          "depth": 2,
+          "label": "Index Scan using orders_customer_status_created_idx on orders",
+          "estimated_rows": 485,
+          "actual_rows": 402,
+          "loops": 1,
+          "q_error": 1.21
+        }
+      ],
+      "workers_launched": 0
+    }
+  },
+  "extras": [],
+  "outcome": {
+    "metric": "server execution time",
+    "before": "6.76 ms",
+    "after": "0.14 ms",
+    "before_value": 6.756,
+    "after_value": 0.141,
+    "speedup": 47.9,
+    "target": 5.0,
+    "same_result": true,
+    "passed": true
+  }
+}

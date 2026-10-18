@@ -1,0 +1,13 @@
+Limit  (cost=1000.46..16513.64 rows=20 width=33) (actual time=3.732..4.460 rows=20 loops=1)
+  Buffers: shared hit=850
+  ->  Gather Merge  (cost=1000.46..377195.05 rows=485 width=33) (actual time=3.731..4.458 rows=20 loops=1)
+        Workers Planned: 2
+        Workers Launched: 2
+        Buffers: shared hit=850
+        ->  Parallel Index Scan Backward using orders_created_at_idx on orders  (cost=0.43..376139.05 rows=202 width=33) (actual time=0.090..1.275 rows=14 loops=3)
+              Filter: ((customer_id = 1) AND (status = ANY ('{pending,paid,shipped}'::text[])))
+              Rows Removed by Filter: 15904
+              Buffers: shared hit=850
+Settings: effective_cache_size = '2560MB', work_mem = '16MB', random_page_cost = '1.1', effective_io_concurrency = '200', max_parallel_workers = '6', jit = 'off'
+Planning Time: 0.068 ms
+Execution Time: 4.472 ms

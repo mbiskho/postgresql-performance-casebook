@@ -1,0 +1,10 @@
+Limit  (cost=0.56..1015.87 rows=20 width=33) (actual time=0.016..0.043 rows=20 loops=1)
+  Buffers: shared hit=29
+  ->  Index Scan using orders_customer_created_idx on orders  (cost=0.56..24621.80 rows=485 width=33) (actual time=0.015..0.041 rows=20 loops=1)
+        Index Cond: (customer_id = 1)
+        Filter: (status = ANY ('{pending,paid,shipped}'::text[]))
+        Rows Removed by Filter: 6
+        Buffers: shared hit=29
+Settings: effective_cache_size = '2560MB', work_mem = '16MB', random_page_cost = '1.1', effective_io_concurrency = '200', max_parallel_workers = '6', jit = 'off'
+Planning Time: 0.057 ms
+Execution Time: 0.051 ms

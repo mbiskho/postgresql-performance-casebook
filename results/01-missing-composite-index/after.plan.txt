@@ -1,0 +1,12 @@
+Limit  (cost=561.09..561.14 rows=20 width=33) (actual time=0.153..0.155 rows=20 loops=1)
+  Buffers: shared hit=410
+  ->  Sort  (cost=561.09..562.31 rows=485 width=33) (actual time=0.153..0.154 rows=20 loops=1)
+        Sort Key: created_at DESC
+        Sort Method: top-N heapsort  Memory: 26kB
+        Buffers: shared hit=410
+        ->  Index Scan using orders_customer_status_created_idx on orders  (cost=0.56..548.19 rows=485 width=33) (actual time=0.007..0.112 rows=402 loops=1)
+              Index Cond: ((customer_id = 1) AND (status = ANY ('{pending,paid,shipped}'::text[])))
+              Buffers: shared hit=410
+Settings: effective_cache_size = '2560MB', work_mem = '16MB', random_page_cost = '1.1', effective_io_concurrency = '200', max_parallel_workers = '6', jit = 'off'
+Planning Time: 0.019 ms
+Execution Time: 0.160 ms

@@ -1,0 +1,8 @@
+Limit  (cost=0.42..22.86 rows=20 width=33) (actual time=0.029..0.076 rows=20 loops=1)
+  Buffers: shared hit=22
+  ->  Index Scan using orders_open_by_customer_idx on orders  (cost=0.42..544.61 rows=485 width=33) (actual time=0.028..0.072 rows=20 loops=1)
+        Index Cond: (customer_id = 1)
+        Buffers: shared hit=22
+Settings: effective_cache_size = '2560MB', work_mem = '16MB', random_page_cost = '1.1', effective_io_concurrency = '200', max_parallel_workers = '6', jit = 'off'
+Planning Time: 0.223 ms
+Execution Time: 0.167 ms

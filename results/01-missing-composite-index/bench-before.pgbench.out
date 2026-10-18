@@ -1,0 +1,13 @@
+pgbench (16.4 (Debian 16.4-1.pgdg120+2), server 16.15 (Debian 16.15-1.pgdg12+2))
+transaction type: /tmp/pgbench-m_avtzrs/bench-before.pgbench
+scaling factor: 1
+query mode: simple
+number of clients: 8
+number of threads: 4
+maximum number of tries: 1
+duration: 30 s
+number of transactions actually processed: 47053
+number of failed transactions: 0 (0.000%)
+latency average = 5.096 ms
+initial connection time = 35.382 ms
+tps = 1569.778110 (without initial connection time)
