@@ -1,0 +1,19 @@
+title = "N+1 queries from an ORM loop"
+category = "Application access pattern"
+summary = "An order-history page loads 50 orders, then each order's items, then each item's product, one query at a time: ~180 round trips for one page. Every individual query is fast, which is why nobody notices."
+driver = "n_plus_one"
+repeat = 15
+warmup = 3
+
+[params]
+# A regular customer with a long history (~200 orders).
+customer_id = """
+SELECT customer_id FROM orders
+WHERE customer_id BETWEEN 1000 AND 3000
+GROUP BY customer_id ORDER BY abs(count(*) - 200), customer_id LIMIT 1
+"""
+
+[n_plus_one]
+parent = "n1_parent.sql"
+child = "n1_child.sql"
+grandchild = "n1_grandchild.sql"
