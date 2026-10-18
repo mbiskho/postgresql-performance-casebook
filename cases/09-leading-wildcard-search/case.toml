@@ -1,0 +1,8 @@
+title = "Leading-wildcard search"
+category = "Indexing"
+summary = "Support searches customers by name with ILIKE '%...%'; no B-tree can serve a leading wildcard, so every search scans 2M rows."
+driver = "plan"
+repeat = 9
+
+[params]
+pattern = "SELECT '%sakura kusumawardani%'"
