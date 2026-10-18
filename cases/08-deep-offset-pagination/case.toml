@@ -1,0 +1,12 @@
+title = "Deep OFFSET pagination"
+category = "Query shape"
+summary = "An admin list pages through orders with OFFSET; page 4,000 reads and discards 200,000 rows to return 50."
+driver = "plan"
+repeat = 9
+
+[params]
+offset = "SELECT 200000"
+# The last row of the previous page, which is what a keyset paginator carries
+# in its "next" link.
+cursor_created_at = "SELECT created_at FROM orders ORDER BY created_at DESC, id DESC OFFSET {{offset}} - 1 LIMIT 1"
+cursor_id = "SELECT id FROM orders ORDER BY created_at DESC, id DESC OFFSET {{offset}} - 1 LIMIT 1"
