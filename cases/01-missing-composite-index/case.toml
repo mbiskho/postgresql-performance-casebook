@@ -1,0 +1,30 @@
+title = "Missing composite index"
+category = "Indexing"
+summary = 'An "open orders" panel filters on customer and status and sorts by date, but only a single-column customer_id index exists.'
+driver = "plan"
+repeat = 9
+
+[params]
+# The heaviest account in the dataset (a reseller with ~20k orders). Big
+# accounts are where this page is slowest and where support tickets come from.
+customer_id = """
+SELECT customer_id FROM orders
+WHERE customer_id <= 100
+GROUP BY customer_id
+ORDER BY count(*) DESC, customer_id
+LIMIT 1
+"""
+
+[[alternative]]
+key = "customer-created"
+name = "Index (customer_id, created_at DESC) without status"
+note = "Serves every status filter with one index, but for an 'open orders' query on a big account it walks delivered orders until it finds 20 in flight."
+fix = "alt_customer_created.sql"
+teardown = "alt_customer_created_teardown.sql"
+
+[[alternative]]
+key = "partial"
+name = "Partial index on in-flight orders only"
+note = "Tiny and just as fast for this panel, because in-flight orders are a fraction of a percent of the table. It serves only queries that repeat the same status predicate, and leaves the account page's other tabs on the single-column index."
+fix = "alt_partial.sql"
+teardown = "alt_partial_teardown.sql"
