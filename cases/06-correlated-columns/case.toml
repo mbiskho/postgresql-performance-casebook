@@ -1,0 +1,9 @@
+title = "Correlated columns fool the row estimate"
+category = "Statistics"
+summary = "A Singapore revenue report filters on country, currency, locale and timezone. They all say the same thing, but the planner multiplies their selectivities, estimates 1 customer instead of 40,000, and picks a serial nested loop."
+driver = "plan"
+repeat = 5
+warmup = 1
+
+[params]
+quarter_start = "SELECT timestamptz '2026-07-01 00:00:00+00'"
