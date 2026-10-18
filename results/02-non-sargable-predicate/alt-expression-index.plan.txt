@@ -1,0 +1,10 @@
+Sort  (cost=1213.86..1245.19 rows=12531 width=41) (actual time=3.929..4.638 rows=22381 loops=1)
+  Sort Key: id
+  Sort Method: quicksort  Memory: 2337kB
+  Buffers: shared hit=254
+  ->  Index Scan using orders_created_utc_date_idx on orders  (cost=0.43..360.93 rows=12531 width=41) (actual time=0.005..1.999 rows=22381 loops=1)
+        Index Cond: (((created_at AT TIME ZONE 'UTC'::text))::date = '2026-03-14'::date)
+        Buffers: shared hit=254
+Settings: effective_cache_size = '2560MB', work_mem = '16MB', random_page_cost = '1.1', effective_io_concurrency = '200', max_parallel_workers = '6', jit = 'off'
+Planning Time: 0.026 ms
+Execution Time: 5.248 ms

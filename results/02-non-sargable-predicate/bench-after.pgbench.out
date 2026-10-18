@@ -1,0 +1,13 @@
+pgbench (16.4 (Debian 16.4-1.pgdg120+2), server 16.15 (Debian 16.15-1.pgdg12+2))
+transaction type: /tmp/pgbench-qrgeiyf7/bench-after.pgbench
+scaling factor: 1
+query mode: simple
+number of clients: 8
+number of threads: 4
+maximum number of tries: 1
+duration: 30 s
+number of transactions actually processed: 10892
+number of failed transactions: 0 (0.000%)
+latency average = 22.032 ms
+initial connection time = 22.441 ms
+tps = 363.115772 (without initial connection time)

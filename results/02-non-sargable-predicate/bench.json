@@ -1,0 +1,42 @@
+{
+  "before": {
+    "clients": 8,
+    "threads": 4,
+    "duration_s": 30,
+    "tps": 1.6,
+    "transactions": 54,
+    "failed": 0,
+    "latency_ms": {
+      "mean": 4613.625,
+      "p50": 3363.082,
+      "p95": 8370.728,
+      "p99": 8622.943
+    },
+    "locks": {
+      "samples": 641,
+      "avg_active": 12.96,
+      "avg_waiting_on_lock": 0,
+      "avg_idle_in_transaction": 0
+    }
+  },
+  "after": {
+    "clients": 8,
+    "threads": 4,
+    "duration_s": 30,
+    "tps": 363.1,
+    "transactions": 10892,
+    "failed": 0,
+    "latency_ms": {
+      "mean": 22.012,
+      "p50": 20.53,
+      "p95": 35.051,
+      "p99": 51.269
+    },
+    "locks": {
+      "samples": 575,
+      "avg_active": 7.29,
+      "avg_waiting_on_lock": 0,
+      "avg_idle_in_transaction": 0
+    }
+  }
+}

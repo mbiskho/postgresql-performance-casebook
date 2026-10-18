@@ -1,0 +1,20 @@
+Gather Merge  (cost=267029.08..274321.26 rows=62500 width=41) (actual time=1374.886..1382.737 rows=22381 loops=1)
+  Workers Planned: 2
+  Workers Launched: 2
+  Buffers: shared hit=2835 read=151600
+  I/O Timings: shared read=2029.740
+  ->  Sort  (cost=266029.06..266107.18 rows=31250 width=41) (actual time=1370.641..1370.897 rows=7460 loops=3)
+        Sort Key: id
+        Sort Method: quicksort  Memory: 342kB
+        Buffers: shared hit=2835 read=151600
+        I/O Timings: shared read=2029.740
+        Worker 0:  Sort Method: quicksort  Memory: 1255kB
+        Worker 1:  Sort Method: quicksort  Memory: 646kB
+        ->  Parallel Seq Scan on orders  (cost=0.00..263696.00 rows=31250 width=41) (actual time=936.209..1368.115 rows=7460 loops=3)
+              Filter: (((created_at AT TIME ZONE 'UTC'::text))::date = '2026-03-14'::date)
+              Rows Removed by Filter: 4992540
+              Buffers: shared hit=2721 read=151600
+              I/O Timings: shared read=2029.740
+Settings: effective_cache_size = '2560MB', work_mem = '16MB', random_page_cost = '1.1', effective_io_concurrency = '200', max_parallel_workers = '6', jit = 'off'
+Planning Time: 0.397 ms
+Execution Time: 1383.749 ms

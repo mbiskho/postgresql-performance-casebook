@@ -1,0 +1,310 @@
+{
+  "case": "02",
+  "slug": "02-non-sargable-predicate",
+  "title": "Non-sargable date predicate",
+  "category": "Query shape",
+  "driver": "plan",
+  "summary": "A daily export casts created_at to a date, so the existing created_at index cannot be used and every run scans 15M rows.",
+  "params": {
+    "day": "2026-03-14"
+  },
+  "measured_at": "2026-10-18T05:16:34+00:00",
+  "environment": {
+    "server_version": "16.15 (Debian 16.15-1.pgdg12+2)",
+    "scale": "1.0",
+    "as_of": "2026-09-30T23:59:59+00:00",
+    "rows": {
+      "customers": 2000000,
+      "products": 100000,
+      "orders": 15000000,
+      "order_items": 37313408,
+      "page_views": 10000000
+    },
+    "database_size": "6928 MB",
+    "cpus": 8,
+    "memory_gb": 3.8,
+    "settings": {
+      "default_statistics_target": "100",
+      "effective_cache_size": "2560MB",
+      "jit": "off",
+      "max_parallel_workers_per_gather": "2",
+      "random_page_cost": "1.1",
+      "shared_buffers": "1GB",
+      "work_mem": "16MB"
+    }
+  },
+  "hypo": null,
+  "before": {
+    "timing": {
+      "runs_ms": [
+        1775.0,
+        1650.699,
+        1656.706,
+        1679.474,
+        1696.16,
+        1670.986,
+        1625.085
+      ],
+      "median_ms": 1670.986,
+      "min_ms": 1625.085,
+      "max_ms": 1775.0,
+      "rows": 22381,
+      "result_digest": "3fc7561e09bfb040",
+      "server": {
+        "calls": 1.0,
+        "exec_ms": 1409.838,
+        "rows": 22381.0,
+        "shared_hit": 2355.0,
+        "shared_read": 152080.0,
+        "shared_dirtied": 0.0,
+        "temp_blks": 0.0,
+        "io_ms": 2078.706,
+        "wal_bytes": 0.0,
+        "non_io_ms": -668.868
+      }
+    },
+    "plan": {
+      "rows_removed": 14977620,
+      "execution_ms": 1428.053,
+      "planning_ms": 0.478,
+      "rows": 22381,
+      "total_cost": 274321.26,
+      "shared_hit_blocks": 2739,
+      "shared_read_blocks": 151696,
+      "buffers_touched_mb": 1206.52,
+      "temp_read_blocks": 0,
+      "temp_written_blocks": 0,
+      "io_read_ms": 2103.007,
+      "root_q_error": 2.79,
+      "worst_estimate": {
+        "label": "Sort",
+        "estimated_rows": 31250,
+        "actual_rows": 7460,
+        "loops": 3,
+        "q_error": 4.19
+      },
+      "node_types": [
+        "Gather Merge",
+        "Seq Scan",
+        "Sort"
+      ],
+      "nodes": [
+        {
+          "depth": 0,
+          "label": "Gather Merge",
+          "estimated_rows": 62500,
+          "actual_rows": 22381,
+          "loops": 1,
+          "q_error": 2.79
+        },
+        {
+          "depth": 1,
+          "label": "Sort",
+          "estimated_rows": 31250,
+          "actual_rows": 7460,
+          "loops": 3,
+          "q_error": 4.19
+        },
+        {
+          "depth": 2,
+          "label": "Seq Scan on orders",
+          "estimated_rows": 31250,
+          "actual_rows": 7460,
+          "loops": 3,
+          "q_error": 4.19
+        }
+      ],
+      "workers_launched": 2
+    }
+  },
+  "alternatives": [
+    {
+      "key": "expression-index",
+      "name": "Keep the query, add an expression index on the UTC date",
+      "note": "Works without touching application code, but it is a second full index on a 15M-row table that every insert must maintain, to serve a predicate that can be rewritten for free.",
+      "fix_sql": "CREATE INDEX orders_created_utc_date_idx ON orders (((created_at AT TIME ZONE 'UTC')::date));\n-- Expression indexes get their own statistics, gathered by ANALYZE.\nANALYZE orders;\n",
+      "fix_seconds": 7.8,
+      "storage": {
+        "index_bytes": 104439808,
+        "table_bytes": 0,
+        "changes": [
+          {
+            "relation": "orders_created_utc_date_idx",
+            "kind": "index",
+            "before_bytes": 0,
+            "after_bytes": 104439808,
+            "delta_bytes": 104439808,
+            "status": "added"
+          }
+        ]
+      },
+      "timing": {
+        "runs_ms": [
+          242.366,
+          244.177,
+          237.798,
+          242.285,
+          242.349,
+          270.119,
+          250.265
+        ],
+        "median_ms": 242.366,
+        "min_ms": 237.798,
+        "max_ms": 270.119,
+        "rows": 22381,
+        "result_digest": "3fc7561e09bfb040",
+        "server": {
+          "calls": 1.0,
+          "exec_ms": 8.711,
+          "rows": 22381.0,
+          "shared_hit": 254.0,
+          "shared_read": 0.0,
+          "shared_dirtied": 0.0,
+          "temp_blks": 0.0,
+          "io_ms": 0.0,
+          "wal_bytes": 0.0,
+          "non_io_ms": 8.711
+        }
+      },
+      "plan": {
+        "rows_removed": 0,
+        "execution_ms": 7.519,
+        "planning_ms": 0.042,
+        "rows": 22381,
+        "total_cost": 1245.19,
+        "shared_hit_blocks": 254,
+        "shared_read_blocks": 0,
+        "buffers_touched_mb": 1.98,
+        "temp_read_blocks": 0,
+        "temp_written_blocks": 0,
+        "io_read_ms": 0.0,
+        "root_q_error": 1.79,
+        "worst_estimate": {
+          "label": "Sort",
+          "estimated_rows": 12531,
+          "actual_rows": 22381,
+          "loops": 1,
+          "q_error": 1.79
+        },
+        "node_types": [
+          "Index Scan",
+          "Sort"
+        ],
+        "nodes": [
+          {
+            "depth": 0,
+            "label": "Sort",
+            "estimated_rows": 12531,
+            "actual_rows": 22381,
+            "loops": 1,
+            "q_error": 1.79
+          },
+          {
+            "depth": 1,
+            "label": "Index Scan using orders_created_utc_date_idx on orders",
+            "estimated_rows": 12531,
+            "actual_rows": 22381,
+            "loops": 1,
+            "q_error": 1.79
+          }
+        ],
+        "workers_launched": 0
+      }
+    }
+  ],
+  "fix": {
+    "seconds": 0.0,
+    "storage": {
+      "index_bytes": 0,
+      "table_bytes": 0,
+      "changes": []
+    },
+    "sql": "-- No schema change. The fix is the rewrite in after.sql: the predicate now\n-- compares the indexed column directly, so orders_created_at_idx applies.\n--\n-- An expression index on ((created_at AT TIME ZONE 'UTC')::date) would also\n-- work, but it costs ~300 MB and slows every insert to fix one query that\n-- can be rewritten for free.\nSELECT 1;\n"
+  },
+  "after": {
+    "timing": {
+      "runs_ms": [
+        237.679,
+        238.748,
+        259.936,
+        238.468,
+        239.426,
+        239.001,
+        238.097
+      ],
+      "median_ms": 238.748,
+      "min_ms": 237.679,
+      "max_ms": 259.936,
+      "rows": 22381,
+      "result_digest": "3fc7561e09bfb040",
+      "server": {
+        "calls": 1.0,
+        "exec_ms": 9.129,
+        "rows": 22381.0,
+        "shared_hit": 296.0,
+        "shared_read": 0.0,
+        "shared_dirtied": 0.0,
+        "temp_blks": 0.0,
+        "io_ms": 0.0,
+        "wal_bytes": 0.0,
+        "non_io_ms": 9.129
+      }
+    },
+    "plan": {
+      "rows_removed": 0,
+      "execution_ms": 5.692,
+      "planning_ms": 0.034,
+      "rows": 22381,
+      "total_cost": 2358.24,
+      "shared_hit_blocks": 296,
+      "shared_read_blocks": 0,
+      "buffers_touched_mb": 2.31,
+      "temp_read_blocks": 0,
+      "temp_written_blocks": 0,
+      "io_read_ms": 0.0,
+      "root_q_error": 1.02,
+      "worst_estimate": {
+        "label": "Index Scan using orders_created_at_idx on orders",
+        "estimated_rows": 21852,
+        "actual_rows": 22381,
+        "loops": 1,
+        "q_error": 1.02
+      },
+      "node_types": [
+        "Index Scan",
+        "Sort"
+      ],
+      "nodes": [
+        {
+          "depth": 0,
+          "label": "Sort",
+          "estimated_rows": 21852,
+          "actual_rows": 22381,
+          "loops": 1,
+          "q_error": 1.02
+        },
+        {
+          "depth": 1,
+          "label": "Index Scan using orders_created_at_idx on orders",
+          "estimated_rows": 21852,
+          "actual_rows": 22381,
+          "loops": 1,
+          "q_error": 1.02
+        }
+      ],
+      "workers_launched": 0
+    }
+  },
+  "extras": [],
+  "outcome": {
+    "metric": "server execution time",
+    "before": "1,409.84 ms",
+    "after": "9.13 ms",
+    "before_value": 1409.838,
+    "after_value": 9.129,
+    "speedup": 154.4,
+    "target": 5.0,
+    "same_result": true,
+    "passed": true
+  }
+}
