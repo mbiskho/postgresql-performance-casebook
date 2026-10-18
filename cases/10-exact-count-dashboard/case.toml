@@ -1,0 +1,10 @@
+title = "Exact counts on every page load"
+category = "Don't fix it in the database"
+summary = "An admin header recomputes order counts by status over 15M rows on every page view. The fix is a change to what the page asks for, not to the planner."
+driver = "plan"
+repeat = 7
+
+[params]
+# The nightly rollup job has processed everything before midnight of the
+# as-of day. Orders since then are counted live.
+rollup_through = "SELECT date_trunc('day', value::timestamptz) FROM casebook_meta WHERE key = 'as_of'"
