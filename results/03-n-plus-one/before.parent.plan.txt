@@ -1,0 +1,12 @@
+Limit  (cost=32.35..32.42 rows=27 width=33) (actual time=0.179..0.183 rows=50 loops=1)
+  Buffers: shared hit=203
+  ->  Sort  (cost=32.35..32.42 rows=27 width=33) (actual time=0.178..0.180 rows=50 loops=1)
+        Sort Key: created_at DESC
+        Sort Method: top-N heapsort  Memory: 32kB
+        Buffers: shared hit=203
+        ->  Index Scan using orders_customer_id_idx on orders  (cost=0.43..31.71 rows=27 width=33) (actual time=0.009..0.145 rows=200 loops=1)
+              Index Cond: (customer_id = 1021)
+              Buffers: shared hit=203
+Settings: effective_cache_size = '2560MB', work_mem = '16MB', random_page_cost = '1.1', effective_io_concurrency = '200', max_parallel_workers = '6', jit = 'off'
+Planning Time: 0.041 ms
+Execution Time: 0.194 ms

@@ -1,0 +1,433 @@
+{
+  "case": "03",
+  "slug": "03-n-plus-one",
+  "title": "N+1 queries from an ORM loop",
+  "category": "Application access pattern",
+  "driver": "n_plus_one",
+  "summary": "An order-history page loads 50 orders, then each order's items, then each item's product, one query at a time: ~180 round trips for one page. Every individual query is fast, which is why nobody notices.",
+  "params": {
+    "customer_id": "1021"
+  },
+  "measured_at": "2026-10-18T05:18:10+00:00",
+  "environment": {
+    "server_version": "16.15 (Debian 16.15-1.pgdg12+2)",
+    "scale": "1.0",
+    "as_of": "2026-09-30T23:59:59+00:00",
+    "rows": {
+      "customers": 2000000,
+      "products": 100000,
+      "orders": 15000000,
+      "order_items": 37313408,
+      "page_views": 10000000
+    },
+    "database_size": "6928 MB",
+    "cpus": 8,
+    "memory_gb": 3.8,
+    "settings": {
+      "default_statistics_target": "100",
+      "effective_cache_size": "2560MB",
+      "jit": "off",
+      "max_parallel_workers_per_gather": "2",
+      "random_page_cost": "1.1",
+      "shared_buffers": "1GB",
+      "work_mem": "16MB"
+    }
+  },
+  "before": {
+    "timing": {
+      "runs_ms": [
+        28.319,
+        28.865,
+        22.008,
+        28.804,
+        30.201,
+        27.232,
+        22.252,
+        27.912,
+        28.231,
+        28.077,
+        28.025,
+        28.169,
+        28.886,
+        29.547,
+        29.6
+      ],
+      "median_ms": 28.231,
+      "min_ms": 22.008,
+      "max_ms": 30.201,
+      "round_trips": 179,
+      "server": {
+        "calls": 179.0,
+        "exec_ms": 0.989,
+        "rows": 306.0,
+        "shared_hit": 788.0,
+        "shared_read": 0.0,
+        "shared_dirtied": 0.0,
+        "temp_blks": 0.0,
+        "io_ms": 0.0,
+        "wal_bytes": 0.0,
+        "non_io_ms": 0.989
+      }
+    },
+    "plan": {
+      "rows_removed": 0,
+      "execution_ms": 0.209,
+      "planning_ms": 0.028,
+      "rows": 50,
+      "total_cost": 32.42,
+      "shared_hit_blocks": 203,
+      "shared_read_blocks": 0,
+      "buffers_touched_mb": 1.59,
+      "temp_read_blocks": 0,
+      "temp_written_blocks": 0,
+      "io_read_ms": 0.0,
+      "root_q_error": 1.85,
+      "worst_estimate": {
+        "label": "Limit",
+        "estimated_rows": 27,
+        "actual_rows": 50,
+        "loops": 1,
+        "q_error": 1.85
+      },
+      "node_types": [
+        "Index Scan",
+        "Limit",
+        "Sort"
+      ],
+      "nodes": [
+        {
+          "depth": 0,
+          "label": "Limit",
+          "estimated_rows": 27,
+          "actual_rows": 50,
+          "loops": 1,
+          "q_error": 1.85
+        },
+        {
+          "depth": 1,
+          "label": "Sort",
+          "estimated_rows": 27,
+          "actual_rows": 50,
+          "loops": 1,
+          "q_error": 1.85
+        },
+        {
+          "depth": 2,
+          "label": "Index Scan using orders_customer_id_idx on orders",
+          "estimated_rows": 27,
+          "actual_rows": 200,
+          "loops": 1,
+          "q_error": 7.41
+        }
+      ],
+      "workers_launched": 0
+    },
+    "statements": [
+      {
+        "role": "parent",
+        "plan": {
+          "rows_removed": 0,
+          "execution_ms": 0.209,
+          "planning_ms": 0.028,
+          "rows": 50,
+          "total_cost": 32.42,
+          "shared_hit_blocks": 203,
+          "shared_read_blocks": 0,
+          "buffers_touched_mb": 1.59,
+          "temp_read_blocks": 0,
+          "temp_written_blocks": 0,
+          "io_read_ms": 0.0,
+          "root_q_error": 1.85,
+          "worst_estimate": {
+            "label": "Limit",
+            "estimated_rows": 27,
+            "actual_rows": 50,
+            "loops": 1,
+            "q_error": 1.85
+          },
+          "node_types": [
+            "Index Scan",
+            "Limit",
+            "Sort"
+          ],
+          "nodes": [
+            {
+              "depth": 0,
+              "label": "Limit",
+              "estimated_rows": 27,
+              "actual_rows": 50,
+              "loops": 1,
+              "q_error": 1.85
+            },
+            {
+              "depth": 1,
+              "label": "Sort",
+              "estimated_rows": 27,
+              "actual_rows": 50,
+              "loops": 1,
+              "q_error": 1.85
+            },
+            {
+              "depth": 2,
+              "label": "Index Scan using orders_customer_id_idx on orders",
+              "estimated_rows": 27,
+              "actual_rows": 200,
+              "loops": 1,
+              "q_error": 7.41
+            }
+          ],
+          "workers_launched": 0
+        }
+      },
+      {
+        "role": "child",
+        "plan": {
+          "rows_removed": 0,
+          "execution_ms": 0.015,
+          "planning_ms": 0.018,
+          "rows": 4,
+          "total_cost": 4.51,
+          "shared_hit_blocks": 4,
+          "shared_read_blocks": 0,
+          "buffers_touched_mb": 0.03,
+          "temp_read_blocks": 0,
+          "temp_written_blocks": 0,
+          "io_read_ms": 0.0,
+          "root_q_error": 6.75,
+          "worst_estimate": {
+            "label": "Sort",
+            "estimated_rows": 27,
+            "actual_rows": 4,
+            "loops": 1,
+            "q_error": 6.75
+          },
+          "node_types": [
+            "Index Scan",
+            "Sort"
+          ],
+          "nodes": [
+            {
+              "depth": 0,
+              "label": "Sort",
+              "estimated_rows": 27,
+              "actual_rows": 4,
+              "loops": 1,
+              "q_error": 6.75
+            },
+            {
+              "depth": 1,
+              "label": "Index Scan using order_items_order_id_idx on order_items",
+              "estimated_rows": 27,
+              "actual_rows": 4,
+              "loops": 1,
+              "q_error": 6.75
+            }
+          ],
+          "workers_launched": 0
+        }
+      },
+      {
+        "role": "grandchild",
+        "plan": {
+          "rows_removed": 0,
+          "execution_ms": 0.009,
+          "planning_ms": 0.014,
+          "rows": 1,
+          "total_cost": 2.51,
+          "shared_hit_blocks": 3,
+          "shared_read_blocks": 0,
+          "buffers_touched_mb": 0.02,
+          "temp_read_blocks": 0,
+          "temp_written_blocks": 0,
+          "io_read_ms": 0.0,
+          "root_q_error": 1.0,
+          "worst_estimate": {
+            "label": "Index Scan using products_pkey on products",
+            "estimated_rows": 1,
+            "actual_rows": 1,
+            "loops": 1,
+            "q_error": 1.0
+          },
+          "node_types": [
+            "Index Scan"
+          ],
+          "nodes": [
+            {
+              "depth": 0,
+              "label": "Index Scan using products_pkey on products",
+              "estimated_rows": 1,
+              "actual_rows": 1,
+              "loops": 1,
+              "q_error": 1.0
+            }
+          ],
+          "workers_launched": 0
+        }
+      }
+    ]
+  },
+  "alternatives": [],
+  "fix": {
+    "seconds": 0.0,
+    "storage": {
+      "index_bytes": 0,
+      "table_bytes": 0,
+      "changes": []
+    },
+    "sql": "-- No schema change: the indexes each lazy load used are already there. The fix\n-- is in the application, replacing lazy loading with one query (after.sql).\n-- In an ORM this is eager loading: select_related / prefetch_related in\n-- Django, includes/preload in Rails, JOIN FETCH in JPA.\nSELECT 1;\n"
+  },
+  "after": {
+    "timing": {
+      "runs_ms": [
+        1.593,
+        1.668,
+        1.513,
+        1.642,
+        2.347,
+        1.797,
+        1.776,
+        1.539,
+        1.515,
+        1.512,
+        1.627,
+        1.527,
+        1.547,
+        1.521,
+        1.507
+      ],
+      "median_ms": 1.547,
+      "min_ms": 1.507,
+      "max_ms": 2.347,
+      "rows": 50,
+      "result_digest": "f5b7246fc02acad0",
+      "server": {
+        "calls": 1.0,
+        "exec_ms": 0.618,
+        "rows": 50.0,
+        "shared_hit": 788.0,
+        "shared_read": 0.0,
+        "shared_dirtied": 0.0,
+        "temp_blks": 0.0,
+        "io_ms": 0.0,
+        "wal_bytes": 0.0,
+        "non_io_ms": 0.618
+      }
+    },
+    "plan": {
+      "rows_removed": 0,
+      "execution_ms": 0.573,
+      "planning_ms": 0.096,
+      "rows": 50,
+      "total_cost": 405.04,
+      "shared_hit_blocks": 788,
+      "shared_read_blocks": 0,
+      "buffers_touched_mb": 6.16,
+      "temp_read_blocks": 0,
+      "temp_written_blocks": 0,
+      "io_read_ms": 0.0,
+      "root_q_error": 1.85,
+      "worst_estimate": {
+        "label": "Index Scan using order_items_order_id_idx on order_items",
+        "estimated_rows": 27,
+        "actual_rows": 3,
+        "loops": 50,
+        "q_error": 9.0
+      },
+      "node_types": [
+        "Aggregate",
+        "Incremental Sort",
+        "Index Scan",
+        "Limit",
+        "Nested Loop",
+        "Sort"
+      ],
+      "nodes": [
+        {
+          "depth": 0,
+          "label": "Sorted Aggregate",
+          "estimated_rows": 27,
+          "actual_rows": 50,
+          "loops": 1,
+          "q_error": 1.85
+        },
+        {
+          "depth": 1,
+          "label": "Incremental Sort",
+          "estimated_rows": 725,
+          "actual_rows": 128,
+          "loops": 1,
+          "q_error": 5.66
+        },
+        {
+          "depth": 2,
+          "label": "Nested Loop",
+          "estimated_rows": 725,
+          "actual_rows": 128,
+          "loops": 1,
+          "q_error": 5.66
+        },
+        {
+          "depth": 3,
+          "label": "Nested Loop",
+          "estimated_rows": 725,
+          "actual_rows": 128,
+          "loops": 1,
+          "q_error": 5.66
+        },
+        {
+          "depth": 4,
+          "label": "Limit",
+          "estimated_rows": 27,
+          "actual_rows": 50,
+          "loops": 1,
+          "q_error": 1.85
+        },
+        {
+          "depth": 5,
+          "label": "Sort",
+          "estimated_rows": 27,
+          "actual_rows": 50,
+          "loops": 1,
+          "q_error": 1.85
+        },
+        {
+          "depth": 6,
+          "label": "Index Scan using orders_customer_id_idx on orders",
+          "estimated_rows": 27,
+          "actual_rows": 200,
+          "loops": 1,
+          "q_error": 7.41
+        },
+        {
+          "depth": 4,
+          "label": "Index Scan using order_items_order_id_idx on order_items",
+          "estimated_rows": 27,
+          "actual_rows": 3,
+          "loops": 50,
+          "q_error": 9.0
+        },
+        {
+          "depth": 3,
+          "label": "Index Scan using products_pkey on products",
+          "estimated_rows": 1,
+          "actual_rows": 1,
+          "loops": 128,
+          "q_error": 1.0
+        }
+      ],
+      "workers_launched": 0
+    }
+  },
+  "extras": [],
+  "outcome": {
+    "metric": "page render time (client)",
+    "before": "28.23 ms",
+    "after": "1.55 ms",
+    "before_value": 28.231,
+    "after_value": 1.547,
+    "speedup": 18.2,
+    "target": 5.0,
+    "same_result": null,
+    "passed": true
+  }
+}

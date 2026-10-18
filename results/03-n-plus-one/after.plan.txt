@@ -1,0 +1,32 @@
+GroupAggregate  (cost=46.09..405.04 rows=27 width=65) (actual time=0.164..0.542 rows=50 loops=1)
+  Group Key: orders.created_at, orders.id, orders.status, orders.total_cents
+  Buffers: shared hit=788
+  ->  Incremental Sort  (cost=46.09..393.83 rows=725 width=88) (actual time=0.156..0.340 rows=128 loops=1)
+        Sort Key: orders.created_at DESC, orders.id, orders.status, orders.total_cents, i.id
+        Presorted Key: orders.created_at
+        Full-sort Groups: 4  Sort Method: quicksort  Average Memory: 29kB  Peak Memory: 29kB
+        Buffers: shared hit=788
+        ->  Nested Loop  (cost=33.08..367.02 rows=725 width=88) (actual time=0.093..0.309 rows=128 loops=1)
+              Buffers: shared hit=788
+              ->  Nested Loop  (cost=32.79..142.24 rows=725 width=57) (actual time=0.091..0.178 rows=128 loops=1)
+                    Buffers: shared hit=404
+                    ->  Limit  (cost=32.35..32.42 rows=27 width=33) (actual time=0.089..0.094 rows=50 loops=1)
+                          Buffers: shared hit=203
+                          ->  Sort  (cost=32.35..32.42 rows=27 width=33) (actual time=0.089..0.091 rows=50 loops=1)
+                                Sort Key: orders.created_at DESC
+                                Sort Method: top-N heapsort  Memory: 32kB
+                                Buffers: shared hit=203
+                                ->  Index Scan using orders_customer_id_idx on orders  (cost=0.43..31.71 rows=27 width=33) (actual time=0.003..0.056 rows=200 loops=1)
+                                      Index Cond: (customer_id = 1021)
+                                      Buffers: shared hit=203
+                    ->  Index Scan using order_items_order_id_idx on order_items i  (cost=0.44..3.80 rows=27 width=32) (actual time=0.001..0.001 rows=3 loops=50)
+                          Index Cond: (order_id = orders.id)
+                          Buffers: shared hit=201
+              ->  Index Scan using products_pkey on products p  (cost=0.29..0.31 rows=1 width=39) (actual time=0.001..0.001 rows=1 loops=128)
+                    Index Cond: (id = i.product_id)
+                    Buffers: shared hit=384
+Settings: effective_cache_size = '2560MB', work_mem = '16MB', random_page_cost = '1.1', effective_io_concurrency = '200', max_parallel_workers = '6', jit = 'off'
+Planning:
+  Buffers: shared hit=14
+Planning Time: 0.090 ms
+Execution Time: 0.554 ms

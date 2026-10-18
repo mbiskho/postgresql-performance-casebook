@@ -1,0 +1,10 @@
+Sort  (cost=4.44..4.51 rows=27 width=24) (actual time=0.005..0.005 rows=4 loops=1)
+  Sort Key: id
+  Sort Method: quicksort  Memory: 25kB
+  Buffers: shared hit=4
+  ->  Index Scan using order_items_order_id_idx on order_items  (cost=0.44..3.80 rows=27 width=24) (actual time=0.003..0.004 rows=4 loops=1)
+        Index Cond: (order_id = 14956450)
+        Buffers: shared hit=4
+Settings: effective_cache_size = '2560MB', work_mem = '16MB', random_page_cost = '1.1', effective_io_concurrency = '200', max_parallel_workers = '6', jit = 'off'
+Planning Time: 0.014 ms
+Execution Time: 0.009 ms
