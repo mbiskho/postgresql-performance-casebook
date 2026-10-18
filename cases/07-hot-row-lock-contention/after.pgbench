@@ -1,0 +1,12 @@
+-- Checkout after the fix.
+\set cust random(1, 2000000)
+\set slot random(0, 15)
+-- 1. Authorise the payment before opening the transaction (capture later).
+\sleep 2 ms
+-- 2. Short transaction; the hot UPDATE goes last so the row lock is held only
+--    until COMMIT, and it hits one of 16 stock slots instead of a single row.
+BEGIN;
+INSERT INTO flash_sale_orders (sale_id, customer_id, slot) VALUES (1, :cust, :slot);
+UPDATE flash_sale_stock SET remaining = remaining - 1
+WHERE sale_id = 1 AND slot = :slot AND remaining > 0;
+COMMIT;

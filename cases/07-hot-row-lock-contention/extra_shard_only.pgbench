@@ -1,0 +1,8 @@
+\set cust random(1, 2000000)
+\set slot random(0, 15)
+BEGIN;
+UPDATE flash_sale_stock SET remaining = remaining - 1
+WHERE sale_id = 1 AND slot = :slot AND remaining > 0;
+\sleep 2 ms
+INSERT INTO flash_sale_orders (sale_id, customer_id, slot) VALUES (1, :cust, :slot);
+COMMIT;

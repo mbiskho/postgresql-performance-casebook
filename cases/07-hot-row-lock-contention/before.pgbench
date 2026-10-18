@@ -1,0 +1,10 @@
+-- Checkout as first written: reserve stock, charge the card, record the order.
+\set cust random(1, 2000000)
+BEGIN;
+UPDATE flash_sale_stock SET remaining = remaining - 1
+WHERE sale_id = 1 AND slot = 0 AND remaining > 0;
+-- The app now calls the payment provider (~2 ms) with the transaction open,
+-- so the row lock taken by the UPDATE is held for the whole call.
+\sleep 2 ms
+INSERT INTO flash_sale_orders (sale_id, customer_id, slot) VALUES (1, :cust, 0);
+COMMIT;

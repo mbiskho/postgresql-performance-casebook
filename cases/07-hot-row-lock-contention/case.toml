@@ -1,0 +1,22 @@
+title = "Hot-row lock contention"
+category = "Concurrency"
+summary = "A flash sale decrements one stock row inside a transaction that also waits on the payment provider. Every checkout queues on that row lock, so 32 concurrent buyers get the throughput of one."
+driver = "pgbench"
+
+[pgbench]
+clients = 32
+threads = 4
+duration = 20
+before = "before.pgbench"
+after = "after.pgbench"
+
+# Each change on its own, measured after fix.sql so the 16 slots exist.
+[[extra]]
+key = "reorder-only"
+name = "Only move the payment call out of the transaction (still one stock row)"
+pgbench = "extra_reorder_only.pgbench"
+
+[[extra]]
+key = "shard-only"
+name = "Only shard the stock row (payment call still inside the transaction)"
+pgbench = "extra_shard_only.pgbench"
