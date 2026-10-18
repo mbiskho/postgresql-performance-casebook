@@ -1,0 +1,104 @@
+name: pg-casebook
+
+services:
+  postgres:
+    build:
+      context: .
+      dockerfile: docker/postgres/Dockerfile
+    image: pg-casebook-postgres:16
+    environment:
+      POSTGRES_DB: casebook
+      POSTGRES_USER: casebook
+      POSTGRES_PASSWORD: casebook-local-only
+    ports:
+      - "${CASEBOOK_PORT:-5434}:5432"
+    # Parallel hash joins and sorts allocate dynamic shared memory; Docker's
+    # 64 MB default makes them fail with "could not resize shared memory".
+    shm_size: 1g
+    volumes:
+      - casebook-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U casebook -d casebook"]
+      interval: 3s
+      timeout: 3s
+      retries: 40
+    restart: unless-stopped
+
+  # One-shot tool container: seeding, running cases, pgbench, reports.
+  # `docker compose run --rm runner <command>`; see the Makefile.
+  runner:
+    build:
+      context: .
+      dockerfile: docker/runner/Dockerfile
+    image: pg-casebook-runner:16
+    profiles: ["tools"]
+    environment:
+      CASEBOOK_DSN: postgresql://casebook:casebook-local-only@postgres:5432/casebook
+      PGHOST: postgres
+      PGUSER: casebook
+      PGPASSWORD: casebook-local-only
+      PGDATABASE: casebook
+    volumes:
+      # Mounted so edits to cases and code apply without rebuilding the image,
+      # and so results land on the host.
+      - ./casebook:/casebook/casebook:ro
+      - ./cases:/casebook/cases:ro
+      - ./sql:/casebook/sql:ro
+      # CASEBOOK_OUT lets the smoke test write somewhere other than the
+      # published results.
+      - ${CASEBOOK_OUT:-.}/results:/casebook/results
+      - ${CASEBOOK_OUT:-.}/reports:/casebook/reports
+      - ${CASEBOOK_OUT:-.}/index.html:/casebook/index.html
+      - ${CASEBOOK_OUT:-.}/README.md:/casebook/README.md
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres-exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter:v0.15.0
+    profiles: ["observability"]
+    command:
+      - --collector.stat_statements
+      - --collector.stat_activity_autovacuum
+      - --collector.long_running_transactions
+    environment:
+      DATA_SOURCE_NAME: postgresql://exporter:exporter-local-only@postgres:5432/casebook?sslmode=disable
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v2.53.2
+    profiles: ["observability"]
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=7d
+    volumes:
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9094:9090"
+    depends_on:
+      - postgres-exporter
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    profiles: ["observability"]
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: casebook-local-only
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/casebook.json
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "3004:3000"
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+volumes:
+  casebook-pgdata:
