@@ -1,0 +1,16 @@
+title = "Non-sargable date predicate"
+category = "Query shape"
+summary = "A daily export casts created_at to a date, so the existing created_at index cannot be used and every run scans 15M rows."
+driver = "plan"
+repeat = 7
+
+[params]
+day = "SELECT date '2026-03-14'"
+
+[[alternative]]
+key = "expression-index"
+name = "Keep the query, add an expression index on the UTC date"
+note = "Works without touching application code, but it is a second full index on a 15M-row table that every insert must maintain, to serve a predicate that can be rewritten for free."
+fix = "alt_expression_index.sql"
+teardown = "alt_expression_index_teardown.sql"
+query = "before.sql"
