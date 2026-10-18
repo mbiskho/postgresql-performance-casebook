@@ -1,0 +1,36 @@
+title = "Partition key does not match the access path"
+category = "Partitioning"
+summary = "page_views is hash-partitioned by user_id for a per-user feed, but every dashboard and the retention job filter on time. No query can prune, so a 3-day report scans all 16 partitions."
+driver = "plan"
+repeat = 7
+
+[params]
+window_start = "SELECT value::timestamptz - interval '3 days' FROM casebook_meta WHERE key = 'as_of'"
+feed_user = """
+SELECT user_id FROM page_views
+WHERE user_id BETWEEN 1 AND 50000
+GROUP BY user_id ORDER BY abs(count(*) - 400), user_id LIMIT 1
+"""
+
+[[extra]]
+key = "feed"
+name = "Per-user activity feed (the query the hash scheme was built for)"
+note = "Repartitioning by time is not free: this query used to prune to one hash partition and now has to visit monthly partitions in order."
+before = "extra_feed.sql"
+after = "extra_feed.sql"
+
+[[extra]]
+key = "retention"
+name = "Retention: remove data older than 13 months"
+note = "Under hash partitioning retention is a DELETE across every partition. Under time partitioning it is a DROP of whole partitions. Timed inside a rolled-back transaction."
+before = "extra_retention_before.sql"
+after = "extra_retention_after.sql"
+explain = false
+
+[[alternative]]
+key = "brin"
+name = "Keep hash partitioning, add a BRIN index on viewed_at"
+note = "Each hash partition is still append-ordered by time, which is exactly what BRIN needs. Fixes the dashboard for a few hundred kilobytes of index; does nothing for retention."
+fix = "alt_brin.sql"
+teardown = "alt_brin_teardown.sql"
+query = "before.sql"
