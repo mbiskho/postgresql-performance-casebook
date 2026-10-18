@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760">
+<rect width="1200" height="760" fill="#ffffff"/>
+<text x="64.0" y="58.0" font-family="Arial,sans-serif" font-size="30" font-weight="700" fill="#0f172a" text-anchor="start">PostgreSQL Performance Casebook</text>
+<text x="66.0" y="88.0" font-family="Arial,sans-serif" font-size="15" font-weight="400" fill="#64748b" text-anchor="start">Reproducible query plans, diagnoses, and measured fixes</text>
+<text x="1136.0" y="88.0" font-family="Arial,sans-serif" font-size="13" font-weight="700" fill="#0f766e" text-anchor="end">ILLUSTRATIVE</text>
+<rect x="64" y="119" width="254" height="94" rx="12" fill="#f8fafc" stroke="#e2e8f0"/>
+<text x="80.0" y="151.0" font-family="Arial,sans-serif" font-size="14" font-weight="600" fill="#64748b" text-anchor="start">Cases</text>
+<text x="80.0" y="188.0" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#0f172a" text-anchor="start">10</text>
+<rect x="332" y="119" width="254" height="94" rx="12" fill="#f8fafc" stroke="#e2e8f0"/>
+<text x="348.0" y="151.0" font-family="Arial,sans-serif" font-size="14" font-weight="600" fill="#64748b" text-anchor="start">Median speed-up</text>
+<text x="348.0" y="188.0" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#0f172a" text-anchor="start">8.0×</text>
+<rect x="600" y="119" width="254" height="94" rx="12" fill="#f8fafc" stroke="#e2e8f0"/>
+<text x="616.0" y="151.0" font-family="Arial,sans-serif" font-size="14" font-weight="600" fill="#64748b" text-anchor="start">Buffer reads</text>
+<text x="616.0" y="188.0" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#0f172a" text-anchor="start">−86%</text>
+<rect x="868" y="119" width="254" height="94" rx="12" fill="#f8fafc" stroke="#e2e8f0"/>
+<text x="884.0" y="151.0" font-family="Arial,sans-serif" font-size="14" font-weight="600" fill="#64748b" text-anchor="start">Plan captured</text>
+<text x="884.0" y="188.0" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#0f172a" text-anchor="start">10/10</text>
+<text x="66.0" y="270.0" font-family="Arial,sans-serif" font-size="20" font-weight="700" fill="#0f172a" text-anchor="start">Illustrative query runtime before and after tuning</text>
+<text x="1136.0" y="270.0" font-family="Arial,sans-serif" font-size="13" font-weight="400" fill="#64748b" text-anchor="end">Query runtime (ms)</text>
+<line x1="95" y1="335.0" x2="1150" y2="335.0" stroke="#e2e8f0"/>
+<text x="85.0" y="340.0" font-family="Arial,sans-serif" font-size="12" font-weight="400" fill="#64748b" text-anchor="end">2.34e+03</text>
+<line x1="95" y1="413.8" x2="1150" y2="413.8" stroke="#e2e8f0"/>
+<text x="85.0" y="418.8" font-family="Arial,sans-serif" font-size="12" font-weight="400" fill="#64748b" text-anchor="end">1.72e+03</text>
+<line x1="95" y1="492.5" x2="1150" y2="492.5" stroke="#e2e8f0"/>
+<text x="85.0" y="497.5" font-family="Arial,sans-serif" font-size="12" font-weight="400" fill="#64748b" text-anchor="end">1.1e+03</text>
+<line x1="95" y1="571.2" x2="1150" y2="571.2" stroke="#e2e8f0"/>
+<text x="85.0" y="576.2" font-family="Arial,sans-serif" font-size="12" font-weight="400" fill="#64748b" text-anchor="end">476</text>
+<line x1="95" y1="650.0" x2="1150" y2="650.0" stroke="#e2e8f0"/>
+<text x="85.0" y="655.0" font-family="Arial,sans-serif" font-size="12" font-weight="400" fill="#64748b" text-anchor="end">-146</text>
+<polyline points="95.0,522.6 270.8,474.4 446.7,537.8 622.5,365.5 798.3,507.4 974.2,431.4 1150.0,515.0" fill="none" stroke="#2563eb" stroke-width="3" stroke-linejoin="round"/>
+<line x1="105" y1="698" x2="129" y2="698" stroke="#2563eb" stroke-width="4"/>
+<text x="137.0" y="703.0" font-family="Arial,sans-serif" font-size="13" font-weight="400" fill="#475569" text-anchor="start">Before</text>
+<polyline points="95.0,616.3 270.8,607.5 446.7,619.5 622.5,592.3 798.3,613.8 974.2,603.7 1150.0,617.0" fill="none" stroke="#0f766e" stroke-width="3" stroke-linejoin="round"/>
+<line x1="350" y1="698" x2="374" y2="698" stroke="#0f766e" stroke-width="4"/>
+<text x="382.0" y="703.0" font-family="Arial,sans-serif" font-size="13" font-weight="400" fill="#475569" text-anchor="start">After</text>
+<line x1="95" y1="335" x2="95" y2="650" stroke="#94a3b8"/>
+<line x1="95" y1="650" x2="1150" y2="650" stroke="#94a3b8"/>
+<line x1="64" y1="734" x2="1136" y2="734" stroke="#e2e8f0"/>
+<text x="65.0" y="756.0" font-family="Arial,sans-serif" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">Synthetic / illustrative values for portfolio visualization; not production measurements.</text>
+</svg>
