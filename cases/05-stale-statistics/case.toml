@@ -1,0 +1,5 @@
+title = "Stale statistics after a bulk load"
+category = "Statistics"
+summary = "Statistics were gathered on the first day of carrier events, when 40% were exceptions. Months of healthy events later, the planner still thinks exceptions are common and walks the whole created_at index looking for them."
+driver = "plan"
+repeat = 7
